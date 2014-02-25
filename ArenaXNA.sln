@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2012 for Windows Desktop
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArenaXNA", "ArenaXNA\ArenaXNA\ArenaXNA.csproj", "{9F14DC3E-4D6B-43EE-98AC-1A12854A3715}"
+EndProject
+Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "ArenaXNAContent", "ArenaXNA\ArenaXNAContent\ArenaXNAContent.contentproj", "{1876E120-BE40-4E2D-B162-30D86BB184FB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9F14DC3E-4D6B-43EE-98AC-1A12854A3715}.Debug|x86.ActiveCfg = Debug|x86
+		{9F14DC3E-4D6B-43EE-98AC-1A12854A3715}.Debug|x86.Build.0 = Debug|x86
+		{9F14DC3E-4D6B-43EE-98AC-1A12854A3715}.Release|x86.ActiveCfg = Release|x86
+		{9F14DC3E-4D6B-43EE-98AC-1A12854A3715}.Release|x86.Build.0 = Release|x86
+		{1876E120-BE40-4E2D-B162-30D86BB184FB}.Debug|x86.ActiveCfg = Debug|x86
+		{1876E120-BE40-4E2D-B162-30D86BB184FB}.Release|x86.ActiveCfg = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
