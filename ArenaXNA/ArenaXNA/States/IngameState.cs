@@ -4,7 +4,9 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 public class IngameState : BasicGameState
@@ -144,41 +146,44 @@ public class IngameState : BasicGameState
 
     public void NewWave()
     {
-        int wavePool = (int)Math.Ceiling(waveNumber * 5.2);
+        int wavePool = (int) waveNumber * 5;
 
-        while (wavePool > enemyPoolSize[0].spawnSlotSize)
+        while (wavePool >= enemyPoolSize[0].spawnSlotSize)
         {
             int enemySelector = rand.Next(0, enemyPoolSize.Count());
-            enemies.Add(enemyPoolSize[enemySelector]);
-            wavePool -= enemyPoolSize[enemySelector].spawnSlotSize;
-
-            #region Positioning
-            Vector2 origin = camera.relativeXY(Vector2.Zero);
-            Rectangle rect = new Rectangle((int)(origin.X), (int)(origin.Y), camera.Viewport.Width, camera.Viewport.Height);
-
-            Vector2 newPosition = new Vector2(rand.Next((int)(origin.X - 50), (int)(origin.X + camera.Viewport.Width + 50)),
-                rand.Next((int)(origin.Y - 50), (int)(origin.Y + camera.Viewport.Height + 50)));
-
-            while (rect.Contains(new Point((int)newPosition.X, (int)newPosition.Y)))
+            if (enemyPoolSize[enemySelector].spawnSlotSize <= wavePool)
             {
-                newPosition = new Vector2(rand.Next((int)(origin.X - 50), (int)(origin.X + camera.Viewport.Width + 50)),
+                enemies.Add(enemyPoolSize[enemySelector]);
+                wavePool -= enemyPoolSize[enemySelector].spawnSlotSize;
+
+                #region Positioning
+                Vector2 origin = camera.relativeXY(Vector2.Zero);
+                Rectangle rect = new Rectangle((int)(origin.X), (int)(origin.Y), camera.Viewport.Width, camera.Viewport.Height);
+
+                Vector2 newPosition = new Vector2(rand.Next((int)(origin.X - 50), (int)(origin.X + camera.Viewport.Width + 50)),
                     rand.Next((int)(origin.Y - 50), (int)(origin.Y + camera.Viewport.Height + 50)));
-            }
 
-            enemyPoolSize[enemySelector].position = newPosition;
+                while (rect.Contains(new Point((int)newPosition.X, (int)newPosition.Y)))
+                {
+                    newPosition = new Vector2(rand.Next((int)(origin.X - 50), (int)(origin.X + camera.Viewport.Width + 50)),
+                        rand.Next((int)(origin.Y - 50), (int)(origin.Y + camera.Viewport.Height + 50)));
+                }
 
-            #endregion
+                enemyPoolSize[enemySelector].position = newPosition;
 
-            #region Recreating Spawnpool
+                #endregion
 
-            enemyPoolSize = new Enemy[]
+                #region Recreating Spawnpool
+
+                enemyPoolSize = new Enemy[]
         {
             new Suicide(new Vector2(-20, -20), 0, this),
             new EMPSuicide(new Vector2(-20, -20), 0, this),
             new BasicShooter(new Vector2(-20, -20), 0, this),
             new DeathSpawner(new Vector2(-20, -20), 0, this),
         };
-            #endregion
+                #endregion
+            }
         }
     }
 
@@ -290,9 +295,12 @@ public class IngameState : BasicGameState
 
     public override void KeyPress(Keys[] keys)
     {
-        if (keys.Contains<Keys>(Keys.Space))
+        if (ApplicationIsActivated())
         {
-            paused = !paused;
+            if (keys.Contains<Keys>(Keys.Space))
+            {
+                paused = !paused;
+            }
         }
     }
 
@@ -341,8 +349,8 @@ public class IngameState : BasicGameState
         spriteBatch.Begin();
 
         //DELETE: Debug wave and kills.
-        spriteBatch.DrawString(Resources.TestFont, "Wave: " + waveNumber.ToString(), new Vector2(0, 0), Color.White);
-        spriteBatch.DrawString(Resources.TestFont, "Kills: " + kills, new Vector2(0, 20), Color.White);
+        spriteBatch.DrawString(Resources.TestFont, "Wave: " + waveNumber.ToString(), new Vector2(10, 0), Color.White);
+        spriteBatch.DrawString(Resources.TestFont, "Kills: " + kills, new Vector2(10, 20), Color.White);
 
 
         #region Paused screen.
@@ -353,4 +361,27 @@ public class IngameState : BasicGameState
         #endregion
         #endregion
     }
+
+    /// <summary>Returns true if the current application has focus, false otherwise</summary>
+    public static bool ApplicationIsActivated()
+    {
+        var activatedHandle = GetForegroundWindow();
+        if (activatedHandle == IntPtr.Zero)
+        {
+            return false;       // No window is currently activated
+        }
+
+        var procId = Process.GetCurrentProcess().Id;
+        int activeProcId;
+        GetWindowThreadProcessId(activatedHandle, out activeProcId);
+
+        return activeProcId == procId;
+    }
+
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+    private static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    private static extern int GetWindowThreadProcessId(IntPtr handle, out int processId);
 }

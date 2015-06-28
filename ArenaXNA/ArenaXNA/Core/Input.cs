@@ -5,6 +5,7 @@ using System.Text;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using System.Collections;
 
 
     public class Input
@@ -12,8 +13,9 @@ using Microsoft.Xna.Framework.Input;
         //Variables
         private KeyboardState keyboardState;
         private static Keys[] keys;
-        private static bool keyIsDown = false;
-        private static bool keyDownLastFrame = false;
+
+        private static ArrayList keysDown = new ArrayList();
+        private static ArrayList keysDownLastFrame = new ArrayList();
 
         private bool dragging = false;
 
@@ -58,7 +60,7 @@ using Microsoft.Xna.Framework.Input;
         //Properties
         public bool KeyIsDown
         {
-            get { return keyIsDown; }
+            get { return keysDown.Count > 0; }
         }
 
         public int X
@@ -155,12 +157,13 @@ using Microsoft.Xna.Framework.Input;
 
             if (keyboardState.GetPressedKeys().Length > 0)
             {
-                keyIsDown = true;
+                keysDown.Clear();
+                keysDown.Add(keyboardState.GetPressedKeys());
                 keys = keyboardState.GetPressedKeys();
             }
             else
             {
-                keyIsDown = false;
+                keysDown.Clear();
             }
             #endregion
 
@@ -250,12 +253,27 @@ using Microsoft.Xna.Framework.Input;
             #endregion
 
             #region KeyPress Triggering
-            if (KeyPress != null)
+            if (KeyPress != null && keysDownLastFrame.Count > 0)
             {
-                if (!keyIsDown && keyDownLastFrame)
-                {
-                    KeyPress(keys);
+                ArrayList pressedKeys = new ArrayList();
+
+                foreach (object k in keysDownLastFrame)
+                    {
+                    if (!keysDown.Contains(k))
+                    {
+                        pressedKeys.Add(k);
+                    }
                 }
+
+                Keys[] returnVar = new Keys[pressedKeys.Count];
+
+                for (int i = 0; i < pressedKeys.Count; i++)
+                {
+                    returnVar[i] = (Keys)pressedKeys[i];
+                }
+
+                KeyPress(returnVar);
+
 
                 if (!right && rightLastFrame)
                 {
@@ -269,7 +287,7 @@ using Microsoft.Xna.Framework.Input;
             }
             #endregion
 
-            if (keyIsDown)
+            if (keysDown.Count > 0)
             {
                 KeyDown(keys);
             }
@@ -346,7 +364,8 @@ using Microsoft.Xna.Framework.Input;
             rightLastFrame = right;
             middleLastFrame = middle;
 
-            keyDownLastFrame = keyIsDown;
+            keysDownLastFrame = keysDown;
+            keysDown.Clear();
             #endregion
         }
 
